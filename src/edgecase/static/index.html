@@ -314,9 +314,11 @@
       $('result-body').textContent = `${result.passed} passed, ${result.failed} failed. ${result.summary}`;
     }
 
-    async function refreshSession() {
-      if (!sessionId) return;
-      const session = await api('GET', `/session/${sessionId}`);
+    async function refreshSession(id) {
+      const sid = id || sessionId;
+      if (!sid) return;
+      sessionId = sid;
+      const session = await api('GET', `/session/${sid}`);
       renderRepo(session);
       if (session.validated_scenarios && session.validated_scenarios.length) {
         renderFindings(session.validated_scenarios);
@@ -554,14 +556,14 @@
     window.set_repository = async (args) => {
       log(`Tool: set_repository(${args.repository})`);
       const data = await api('POST', `/session/${args.session_id}/repository`, { repository: args.repository });
-      await refreshSession();
+      await refreshSession(args.session_id);
       return { repository: data.repository, confirmed: false };
     };
 
     window.confirm_repository = async (args) => {
       log('Tool: confirm_repository');
       const data = await api('POST', `/session/${args.session_id}/confirm`);
-      await refreshSession();
+      await refreshSession(args.session_id);
       return { repository: data.repository, confirmed: true };
     };
 
@@ -585,7 +587,7 @@
         if (data.status === 'completed') {
           clearInterval(poll);
           log('Analysis completed', 'success');
-          await refreshSession();
+          await refreshSession(args.session_id);
         } else if (data.status === 'failed') {
           clearInterval(poll);
           log('Analysis failed: ' + (data.error || 'unknown'), 'error');
@@ -605,7 +607,7 @@
       log('Tool: get_findings');
       const f = await api('GET', `/session/${args.session_id}/findings`);
       log(`Found ${f.length} scenario(s)`, 'success');
-      await refreshSession();
+      await refreshSession(args.session_id);
       return { findings: f };
     };
 
