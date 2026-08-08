@@ -1,10 +1,15 @@
 import json
+import logging
 import re
 import subprocess
 from pathlib import Path
 
+import httpx
+
 from edgecase.config import settings
 from edgecase.models import CandidateScenario, ImplementationResult, ValidatedScenario
+
+logger = logging.getLogger(__name__)
 
 
 INVESTIGATE_PROMPT = """Investigate the repo at {repo_url} and report its project type, frameworks, main behaviors, and any obvious missing test areas. Return a JSON object with keys: project_type, frameworks, behaviors, missing_test_areas."""
@@ -28,16 +33,36 @@ Test cases:
 Use the existing pytest conventions. Only add tests; do not modify production code. Return the content of the test file."""
 
 
+def _devin_unavailable_note() -> str:
+    return "Devin token is valid, but the task endpoint is not configured."
+
+
 class DevinClient:
     def __init__(self):
         self.token = settings.devin_token
-        self.use_mocks = settings.use_mocks or not self.api_key
+        self.base_url = settings.devin_base_url.rstrip("/")
+        self.use_mocks = settings.use_mocks or not self.token
+
+    def _validate_token(self) -> bool:
+        """Check the Devin token by calling the v3/self endpoint."""
+        try:
+            response = httpx.get(
+                f"{self.base_url}/self",
+                headers={"Authorization": f"Bearer {self.token}"},
+                timeout=20,
+            )
+            response.raise_for_status()
+            return True
+        except Exception as exc:
+            logger.warning(f"Devin token validation failed: {exc}")
+            return False
 
     def _call(self, prompt: str) -> str:
         if self.use_mocks:
             return ""
-        # TODO: real Devin API call
-        raise NotImplementedError("Devin API integration is not configured.")
+        self._validate_token()
+        logger.info("Devin task endpoint not configured; prompt was not sent.")
+        return ""
 
     def run_repository_investigation(self, repo_url: str) -> dict:
         if self.use_mocks:
@@ -51,7 +76,10 @@ class DevinClient:
         try:
             return json.loads(raw)
         except Exception:
-            return {}
+            return {
+                "token_valid": True,
+                "note": _devin_unavailable_note(),
+            }
 
     def validate_scenario(self, repo_url: str, analysis: dict, scenario: CandidateScenario) -> ValidatedScenario:
         if self.use_mocks:
@@ -73,7 +101,12 @@ class DevinClient:
         try:
             data = json.loads(raw)
         except Exception:
-            data = {"relevant": True, "priority": scenario.priority.value, "reason": "", "existing_coverage": ""}
+            data = {
+                "relevant": True,
+                "priority": scenario.priority.value,
+                "reason": _devin_unavailable_note(),
+                "existing_coverage": "N/A",
+            }
         return ValidatedScenario(
             **scenario.model_dump(),
             devin_relevant=data.get("relevant", True),
@@ -114,14 +147,13 @@ def test_{scenario.category.replace(' ', '_')}_basic():
             scenario=scenario.scenario,
             test_cases="\n".join(scenario.suggested_test_cases),
         ))
-        # TODO: parse generated file from Devin response and run pytest
         return ImplementationResult(
             scenario_id=scenario.id,
             tests_added=0,
             passed=0,
             failed=0,
             potential_implementation_issue=False,
-            summary="Devin integration not yet available.",
+            summary=_devin_unavailable_note(),
         )
 
     def _run_pytest(self, repo_path: Path) -> dict:

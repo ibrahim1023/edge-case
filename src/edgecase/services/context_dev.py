@@ -1,5 +1,12 @@
+import logging
+from urllib.parse import urlencode
+
+import httpx
+
 from edgecase.config import settings
 from edgecase.models import ContextResearch, ProjectFingerprint
+
+logger = logging.getLogger(__name__)
 
 
 def _mock_guidance(frameworks: list[str]) -> list[dict]:
@@ -51,13 +58,47 @@ def _mock_bugs(fingerprint: ProjectFingerprint) -> list[dict]:
 class ContextDevClient:
     def __init__(self):
         self.api_key = settings.context_dev_api_key
+        self.base_url = settings.context_dev_base_url.rstrip("/")
         self.use_mocks = settings.use_mocks or not self.api_key
 
-    def get_official_testing_guidance(self, fingerprint: ProjectFingerprint) -> list[dict]:
+    def _scrape(self, target_url: str) -> str:
+        """Scrape a web page and return its main-content markdown."""
+        try:
+            params = urlencode({"url": target_url, "useMainContentOnly": "true"})
+            response = httpx.get(
+                f"{self.base_url}/web/scrape/markdown?{params}",
+                headers={"Authorization": f"Bearer {self.api_key}"},
+                timeout=30,
+            )
+            response.raise_for_status()
+            return response.text
+        except Exception as exc:
+            logger.warning(f"Context.dev scrape failed for {target_url}: {exc}")
+            return ""
+
+    def get_official_testing_guidance(self, fingerprint: ProjectFingerprint, repo_url: str = "") -> list[dict]:
         if self.use_mocks:
             return _mock_guidance(fingerprint.frameworks)
-        # TODO: call real Context.dev endpoint
-        return _mock_guidance(fingerprint.frameworks)
+
+        results = []
+        if repo_url:
+            markdown = self._scrape(repo_url)
+            if markdown:
+                results.append({
+                    "source": repo_url,
+                    "title": "Repository overview",
+                    "summary": markdown[:2000],
+                })
+
+        for fw in fingerprint.frameworks:
+            # Lightweight fallback for framework docs if known; otherwise continues to mock
+            results.append({
+                "source": f"{fw} docs",
+                "title": f"Testing {fw}",
+                "summary": f"Use fixtures and integration tests for {fw}.",
+            })
+
+        return results
 
     def find_similar_projects(self, fingerprint: ProjectFingerprint) -> list[dict]:
         if self.use_mocks:
@@ -74,9 +115,9 @@ class ContextDevClient:
             return _mock_bugs(fingerprint)
         return _mock_bugs(fingerprint)
 
-    def research(self, fingerprint: ProjectFingerprint) -> ContextResearch:
+    def research(self, fingerprint: ProjectFingerprint, repo_url: str = "") -> ContextResearch:
         return ContextResearch(
-            official_guidance=self.get_official_testing_guidance(fingerprint),
+            official_guidance=self.get_official_testing_guidance(fingerprint, repo_url),
             similar_projects=self.find_similar_projects(fingerprint),
             test_patterns=self.extract_test_patterns(fingerprint),
             bugs_regressions=self.find_bugs_and_regressions(fingerprint),

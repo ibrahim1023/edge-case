@@ -29,8 +29,8 @@ def _run_analysis(
         test_files = list_test_files(repo_path)
         analysis = analyze_repo(repo_path, source_files, test_files)
         fingerprint = build_fingerprint(analysis)
-        research = engine.context.research(fingerprint)
-        candidates = engine.generate_candidates(analysis, fingerprint, session.scope, research)
+        research = engine.context.research(fingerprint, session.repository_url or "")
+        candidates = engine.generate_candidates(analysis, fingerprint, session.scope, research, session.repository_url or "")
         validated = engine.validate_and_rank(repository_url, analysis, candidates)
 
         session.repo_analysis = analysis

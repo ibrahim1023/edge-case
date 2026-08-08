@@ -176,8 +176,9 @@ class ScenarioEngine:
         fingerprint: ProjectFingerprint,
         scope: Scope = Scope.WHOLE_PROJECT,
         research: ContextResearch | None = None,
+        repo_url: str = "",
     ) -> list[CandidateScenario]:
-        research = research or self.context.research(fingerprint)
+        research = research or self.context.research(fingerprint, repo_url)
         categories = self._categories_for(fingerprint, scope)
         candidates = [self._build_candidate(c, fingerprint, analysis, research) for c in categories]
         return candidates
