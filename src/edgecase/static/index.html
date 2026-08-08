@@ -469,6 +469,15 @@
         script.src = 'https://unpkg.com/@elevenlabs/convai-widget-embed';
         script.async = true;
         script.type = 'text/javascript';
+        script.onload = () => {
+          log('Widget script loaded');
+          setTimeout(() => {
+            if (!customElements.get('elevenlabs-convai')) {
+              log('Widget script loaded but did not register the element. Check the browser console for errors.', 'error');
+            }
+          }, 2000);
+        };
+        script.onerror = () => log('Failed to load ElevenLabs widget script.', 'error');
         document.body.appendChild(script);
       } catch (err) {
         log('Voice init failed: ' + err.message, 'error');
