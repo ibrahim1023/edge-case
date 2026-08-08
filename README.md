@@ -40,6 +40,7 @@ Open `http://localhost:8000/` for the text UI or `/docs` for the OpenAPI spec.
 | `STRATEGY.md` | Implementation strategy and mock-first approach |
 | `Task.md` | Phased task tracker with checkboxes |
 | `Product Spec.md` | Original product requirements |
+| `TECH-SPEC.md` | Engineering reasoning: problem, architecture, tool rationale, feasibility, extensibility |
 
 ## Configuration
 
