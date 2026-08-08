@@ -215,6 +215,11 @@
         </dl>
       </div>
 
+      <h2>Backend activity</h2>
+      <div id="activity-card" class="card hidden">
+        <p id="activity-detail"></p>
+      </div>
+
       <h2>Findings</h2>
       <div id="findings-card" class="card hidden">
         <div id="findings-list"></div>
@@ -264,6 +269,12 @@
 
     function setStatus(text) {
       $('status-badge').textContent = text;
+    }
+
+    function setActivity(text) {
+      if (!text) return;
+      $('activity-detail').textContent = text;
+      $('activity-card').classList.remove('hidden');
     }
 
     function renderRepo(session) {
@@ -368,10 +379,12 @@
         if (data.detail && data.detail !== lastDetail) {
           lastDetail = data.detail;
           log(`Analysis: ${data.detail}`);
+          setActivity(data.detail);
         }
         if (data.status === 'completed') {
           clearInterval(poll);
           log('Analysis complete', 'success');
+          setActivity('Completed');
           await refreshSession();
         } else if (data.status === 'failed') {
           clearInterval(poll);
@@ -592,14 +605,17 @@
         if (data.detail && data.detail !== lastDetail) {
           lastDetail = data.detail;
           log(`Analysis: ${data.detail}`);
+          setActivity(data.detail);
         }
         if (data.status === 'completed') {
           clearInterval(poll);
           log('Analysis completed', 'success');
+          setActivity('Completed');
           await refreshSession(args.session_id);
         } else if (data.status === 'failed') {
           clearInterval(poll);
           log('Analysis failed: ' + (data.error || 'unknown'), 'error');
+          setActivity('Failed');
         }
       }, 1000);
 
