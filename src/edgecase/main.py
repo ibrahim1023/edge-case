@@ -5,6 +5,7 @@ from fastapi.staticfiles import StaticFiles
 
 from edgecase.api import (
     analyze,
+    config,
     explain,
     findings,
     implement,
@@ -21,6 +22,7 @@ app = FastAPI(
     version="0.1.0",
 )
 
+app.include_router(config.router)
 app.include_router(session.router)
 app.include_router(repository.router)
 app.include_router(preferences.router)

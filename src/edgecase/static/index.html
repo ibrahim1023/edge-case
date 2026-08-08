@@ -451,6 +451,80 @@
         $('autopilot').disabled = false;
       }
     };
+
+    async function initVoice() {
+      try {
+        const cfg = await fetch('/config').then(r => r.json());
+        if (!cfg.elevenlabs_agent_id) {
+          log('Voice widget not configured. Set ELEVENLABS_AGENT_ID in .env.', 'error');
+          return;
+        }
+        log('Loading voice widget...');
+        const widget = document.createElement('elevenlabs-convai');
+        widget.setAttribute('agent-id', cfg.elevenlabs_agent_id);
+        widget.setAttribute('id', 'convai-widget');
+        $('widget-host').appendChild(widget);
+
+        const script = document.createElement('script');
+        script.src = 'https://elevenlabs.io/convai-widget/index.js';
+        script.async = true;
+        document.body.appendChild(script);
+      } catch (err) {
+        log('Voice init failed: ' + err.message, 'error');
+      }
+    }
+
+    window.create_session = async () => {
+      const session = await api('POST', '/session');
+      sessionId = session.id;
+      setStatus('created');
+      return { session_id: session.id };
+    };
+
+    window.set_repository = async (args) => {
+      const data = await api('POST', `/session/${args.session_id}/repository`, { repository: args.repository });
+      await refreshSession();
+      return { repository: data.repository, confirmed: false };
+    };
+
+    window.confirm_repository = async (args) => {
+      const data = await api('POST', `/session/${args.session_id}/confirm`);
+      await refreshSession();
+      return { repository: data.repository, confirmed: true };
+    };
+
+    window.set_preferences = async (args) => {
+      await api('POST', `/session/${args.session_id}/preferences`, {
+        scope: args.scope,
+        depth: args.depth,
+        allow_devin_implementation: args.allow_devin_implementation,
+      });
+      return { ok: true };
+    };
+
+    window.start_analysis = async (args) => {
+      await api('POST', `/session/${args.session_id}/analyze`);
+      return { status: 'running' };
+    };
+
+    window.get_status = async (args) => {
+      return await api('GET', `/session/${args.session_id}/status`);
+    };
+
+    window.get_findings = async (args) => {
+      const f = await api('GET', `/session/${args.session_id}/findings`);
+      return { findings: f };
+    };
+
+    window.explain_scenario = async (args) => {
+      return await api('POST', `/session/${args.session_id}/explain`, { scenario_index: args.scenario_index });
+    };
+
+    window.implement_scenario = async (args) => {
+      return await api('POST', `/session/${args.session_id}/scenarios/${args.scenario_id}/implement`);
+    };
+
+    initVoice();
   </script>
 </body>
 </html>
