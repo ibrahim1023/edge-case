@@ -11,8 +11,8 @@ Legend: `[x]` = implemented, `[ ]` = not yet implemented.
 - [x] Add `README.md` with setup and run instructions
 - [x] Create `AGENTS.md` with project conventions
 - [ ] Set up virtual environment in repo (optional)
-- [ ] Add `ruff` / `mypy` to `pyproject.toml` optional dependencies
-- [ ] Add CI workflow for linting and tests
+- [x] Add `ruff` / `mypy` to `pyproject.toml` optional dependencies
+- [x] Add CI workflow for linting and tests
 
 ---
 
@@ -22,8 +22,8 @@ Legend: `[x]` = implemented, `[ ]` = not yet implemented.
 - [x] Define `Scope`, `Depth`, `Priority` enums
 - [x] Implement in-memory `SessionStore`
 - [x] Create `config.py` with `pydantic-settings`
-- [ ] Persist sessions to disk or SQLite
-- [ ] Add session expiry / cleanup
+- [x] Persist sessions to disk or SQLite
+- [x] Add session expiry / cleanup
 
 ---
 

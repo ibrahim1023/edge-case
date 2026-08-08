@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     github_token: str | None = None
     use_mocks: bool = True
     repo_clone_dir: Path = Path("/tmp/edgecase_repos")
+    session_db_path: Path = Path.home() / ".edgecase" / "sessions.db"
+    session_ttl_seconds: int = 86400
 
 
 settings = Settings()

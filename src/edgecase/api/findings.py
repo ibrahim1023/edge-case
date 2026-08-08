@@ -2,7 +2,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException
 
-from edgecase.models import Session, ValidatedScenario
+from edgecase.models import ValidatedScenario
 from edgecase.state import store
 
 router = APIRouter(prefix="/session", tags=["findings"])
