@@ -452,33 +452,81 @@
       }
     };
 
+    let voiceConversation = null;
+
+    function setVoiceUI(state) {
+      const host = $('widget-host');
+      host.innerHTML = '';
+      if (state === 'idle') {
+        const btn = document.createElement('button');
+        btn.textContent = 'Start voice';
+        btn.onclick = startVoice;
+        host.appendChild(btn);
+      } else if (state === 'active') {
+        const btn = document.createElement('button');
+        btn.className = 'secondary';
+        btn.textContent = 'Stop voice';
+        btn.onclick = stopVoice;
+        host.appendChild(btn);
+      }
+    }
+
+    async function startVoice() {
+      try {
+        log('Starting voice session...');
+        const { Conversation } = await import('https://cdn.jsdelivr.net/npm/@elevenlabs/client/+esm');
+
+        const clientTools = {
+          create_session: window.create_session,
+          set_repository: window.set_repository,
+          confirm_repository: window.confirm_repository,
+          set_preferences: window.set_preferences,
+          start_analysis: window.start_analysis,
+          get_status: window.get_status,
+          get_findings: window.get_findings,
+          explain_scenario: window.explain_scenario,
+          implement_scenario: window.implement_scenario,
+        };
+
+        const cfg = await fetch('/config').then(r => r.json());
+        voiceConversation = await Conversation.startSession({
+          agentId: cfg.elevenlabs_agent_id,
+          clientTools,
+          onMessage: (msg) => {
+            const role = msg.source || msg.role || 'agent';
+            const text = msg.message || msg.text || '';
+            if (text) log(`${role === 'user' ? 'You' : 'Agent'}: ${text}`, role === 'user' ? 'user' : 'agent');
+          },
+          onError: (err) => {
+            log('Voice error: ' + (err && err.message ? err.message : String(err)), 'error');
+          },
+        });
+
+        setVoiceUI('active');
+        log('Voice connected. Speak now.', 'success');
+      } catch (err) {
+        log('Voice failed to start: ' + err.message, 'error');
+        setVoiceUI('idle');
+      }
+    }
+
+    function stopVoice() {
+      if (voiceConversation) {
+        voiceConversation.endSession();
+        voiceConversation = null;
+      }
+      setVoiceUI('idle');
+      log('Voice session ended');
+    }
+
     async function initVoice() {
       try {
         const cfg = await fetch('/config').then(r => r.json());
         if (!cfg.elevenlabs_agent_id) {
-          log('Voice widget not configured. Set ELEVENLABS_AGENT_ID in .env.', 'error');
+          log('Voice not configured. Set ELEVENLABS_AGENT_ID in .env.', 'error');
           return;
         }
-        log('Loading voice widget...');
-        const widget = document.createElement('elevenlabs-convai');
-        widget.setAttribute('agent-id', cfg.elevenlabs_agent_id);
-        widget.setAttribute('id', 'convai-widget');
-        $('widget-host').appendChild(widget);
-
-        const script = document.createElement('script');
-        script.src = 'https://unpkg.com/@elevenlabs/convai-widget-embed';
-        script.async = true;
-        script.type = 'text/javascript';
-        script.onload = () => {
-          log('Widget script loaded');
-          setTimeout(() => {
-            if (!customElements.get('elevenlabs-convai')) {
-              log('Widget script loaded but did not register the element. Check the browser console for errors.', 'error');
-            }
-          }, 2000);
-        };
-        script.onerror = () => log('Failed to load ElevenLabs widget script.', 'error');
-        document.body.appendChild(script);
+        setVoiceUI('idle');
       } catch (err) {
         log('Voice init failed: ' + err.message, 'error');
       }
