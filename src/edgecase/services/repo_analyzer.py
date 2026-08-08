@@ -209,4 +209,6 @@ def analyze_repo(repo_path: Path, source_files: list[Path], test_files: list[Pat
         test_files=[str(p.relative_to(repo_path)) for p in test_files],
         entry_points=entry_points,
         existing_tests_summary=summary,
+        source_file_count=len(source_files),
+        test_function_count=test_count,
     )

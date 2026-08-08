@@ -46,8 +46,8 @@ Legend: `[x]` = implemented, `[ ]` = not yet implemented.
 - [x] Implement `fingerprint.py` to infer `project_type`
 - [x] Map frameworks to architecture (`fastapi-routes`, `sqlalchemy-orm`, etc.)
 - [x] Map behaviors to domain (`payments`, `webhooks`, etc.)
-- [ ] Add version / maturity signals to fingerprint
-- [ ] Normalize project type logic for monorepos
+- [x] Add version / maturity signals to fingerprint
+- [x] Normalize project type logic for monorepos
 
 ---
 
@@ -56,7 +56,7 @@ Legend: `[x]` = implemented, `[ ]` = not yet implemented.
 - [x] Create `context_dev.py` client abstraction
 - [x] Add mock responses for guidance, similar projects, patterns, bugs
 - [x] Integrate real Context.dev endpoint
-- [ ] Cache research per session
+- [x] Cache research per session
 - [x] Fallback to mock with clear logging when API is unavailable
 
 ---

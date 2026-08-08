@@ -44,6 +44,8 @@ class RepoAnalysis(BaseModel):
     background_jobs: list[str] = []
     security_boundaries: list[str] = []
     existing_tests_summary: str = ""
+    source_file_count: int = 0
+    test_function_count: int = 0
 
 
 class ProjectFingerprint(BaseModel):
@@ -56,6 +58,8 @@ class ProjectFingerprint(BaseModel):
     behaviors: list[str] = []
     domain: str = ""
     architecture: str = ""
+    maturity: str = "unknown"
+    is_monorepo: bool = False
 
 
 class CandidateScenario(BaseModel):

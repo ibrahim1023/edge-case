@@ -1,4 +1,9 @@
+from pathlib import Path
+
 from edgecase.models import ProjectFingerprint, RepoAnalysis
+
+
+_MANIFEST_FILES = ("pyproject.toml", "setup.py", "setup.cfg")
 
 
 def _architecture(analysis: RepoAnalysis) -> str:
@@ -32,6 +37,29 @@ def _domain(analysis: RepoAnalysis) -> str:
     return "general-python"
 
 
+def _maturity(analysis: RepoAnalysis) -> str:
+    if analysis.test_function_count == 0:
+        return "no-tests"
+    density = analysis.test_function_count / max(analysis.source_file_count, 1)
+    if analysis.test_function_count >= 50 or density >= 0.2:
+        return "mature"
+    if analysis.test_function_count >= 10:
+        return "mid"
+    return "early"
+
+
+def _is_monorepo(repo_path: Path) -> bool:
+    if not repo_path.exists() or not repo_path.is_dir():
+        return False
+    roots = set()
+    if any((repo_path / m).exists() for m in _MANIFEST_FILES):
+        roots.add(".")
+    for sub in repo_path.iterdir():
+        if sub.is_dir() and any((sub / m).exists() for m in _MANIFEST_FILES):
+            roots.add(sub.name)
+    return len(roots) > 1
+
+
 def build_fingerprint(analysis: RepoAnalysis) -> ProjectFingerprint:
     return ProjectFingerprint(
         project_type=analysis.project_type,
@@ -42,4 +70,6 @@ def build_fingerprint(analysis: RepoAnalysis) -> ProjectFingerprint:
         behaviors=analysis.behaviors,
         domain=_domain(analysis),
         architecture=_architecture(analysis),
+        maturity=_maturity(analysis),
+        is_monorepo=_is_monorepo(analysis.repo_path),
     )

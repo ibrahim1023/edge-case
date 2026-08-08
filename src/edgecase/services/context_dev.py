@@ -65,6 +65,7 @@ class ContextDevClient:
             timeout=30,
             follow_redirects=True,
         )
+        self._research_cache: dict[str, ContextResearch] = {}
 
     def _request(self, method: str, path: str, **kwargs) -> httpx.Response:
         url = f"{self.base_url}{path}"
@@ -137,10 +138,20 @@ class ContextDevClient:
             return _mock_bugs(fingerprint)
         return _mock_bugs(fingerprint)
 
+    def _research_key(self, fingerprint: ProjectFingerprint, repo_url: str) -> str:
+        if repo_url:
+            return repo_url
+        return f"{fingerprint.domain}:{','.join(fingerprint.frameworks)}:{','.join(fingerprint.behaviors)}"
+
     def research(self, fingerprint: ProjectFingerprint, repo_url: str = "") -> ContextResearch:
-        return ContextResearch(
+        key = self._research_key(fingerprint, repo_url)
+        if key in self._research_cache:
+            return self._research_cache[key]
+        research = ContextResearch(
             official_guidance=self.get_official_testing_guidance(fingerprint, repo_url),
             similar_projects=self.find_similar_projects(fingerprint),
             test_patterns=self.extract_test_patterns(fingerprint),
             bugs_regressions=self.find_bugs_and_regressions(fingerprint),
         )
+        self._research_cache[key] = research
+        return research
