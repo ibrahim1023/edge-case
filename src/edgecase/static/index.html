@@ -5,44 +5,153 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EdgeCase — Voice-First Test Scenario Agent</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 1rem; }
-    input, button { font-size: 1rem; padding: 0.5rem; }
-    #output { white-space: pre-wrap; background: #f6f8fa; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem; }
-    .step { margin-top: 1rem; }
+    :root {
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --panel-2: #334155;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --success: #4ade80;
+      --danger: #f87171;
+    }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 1rem;
+    }
+    h1 { margin: 0; }
+    p { color: var(--muted); margin: 0.25rem 0 1rem; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .panel {
+      background: var(--panel);
+      border-radius: 0.75rem;
+      padding: 1rem;
+    }
+    .panel h2 { margin-top: 0; font-size: 1.1rem; color: var(--accent); }
+    label { display: block; margin-top: 0.75rem; color: var(--muted); font-size: 0.85rem; }
+    input, select {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.25rem;
+      border: 1px solid var(--panel-2);
+      border-radius: 0.5rem;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .row { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+    .row > * { flex: 1; }
+    button {
+      background: var(--accent);
+      color: #0f172a;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    button.secondary { background: var(--panel-2); color: var(--text); }
+    #transcript {
+      height: 260px;
+      overflow-y: auto;
+      background: var(--bg);
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    #transcript .line { margin: 0.35rem 0; }
+    #transcript .line.user { color: var(--accent); }
+    #transcript .line.agent { color: var(--text); }
+    #transcript .line.success { color: var(--success); }
+    #transcript .line.error { color: var(--danger); }
+    .note { color: var(--muted); font-size: 0.85rem; }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
   <h1>EdgeCase</h1>
-  <p>Enter a public Python repo in <code>owner/repo</code> format.</p>
+  <p>Discover the most important missing pytest scenarios for any public Python GitHub repo.</p>
 
-  <div class="step">
-    <input id="repo" type="text" placeholder="ibrahim1023/ci-rootcause" value="ibrahim1023/ci-rootcause" />
-    <button id="start">Start Session</button>
+  <div class="grid">
+    <div class="panel">
+      <h2>Voice</h2>
+      <p class="note">When an <code>ELEVENLABS_AGENT_ID</code> is configured, the ElevenLabs widget appears here and can drive the whole flow by voice.</p>
+      <div id="widget-host"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Text Fallback</h2>
+
+      <label for="repo">Repository (owner/repo)</label>
+      <input id="repo" type="text" value="ibrahim1023/ci-rootcause" />
+
+      <div class="row">
+        <select id="scope">
+          <option value="whole_project" selected>whole_project</option>
+          <option value="api">api</option>
+          <option value="database">database</option>
+          <option value="auth">auth</option>
+          <option value="background_jobs">background_jobs</option>
+          <option value="module">module</option>
+        </select>
+        <select id="depth">
+          <option value="high_value" selected>high_value</option>
+          <option value="exhaustive">exhaustive</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <button id="autopilot" class="secondary">Run full autopilot</button>
+        <button id="reset" class="secondary">Reset</button>
+      </div>
+
+      <label>Manual steps</label>
+      <div class="row">
+        <button id="start">1. Session</button>
+        <button id="set">2. Repo</button>
+        <button id="confirm">3. Confirm</button>
+        <button id="preferences">4. Prefs</button>
+      </div>
+      <div class="row">
+        <button id="analyze">5. Analyze</button>
+        <button id="findings" disabled>6. Findings</button>
+        <button id="explain" disabled>7. Explain</button>
+        <button id="implement" disabled>8. Implement</button>
+      </div>
+
+      <div id="transcript"></div>
+    </div>
   </div>
-
-  <div class="step">
-    <button id="set">Set Repository</button>
-    <button id="confirm">Confirm</button>
-    <button id="analyze">Analyze</button>
-  </div>
-
-  <div class="step">
-    <input id="scenarioIdx" type="number" value="0" min="0" max="4" />
-    <button id="implement">Implement Selected</button>
-    <button id="explain">Explain Selected</button>
-  </div>
-
-  <pre id="output"></pre>
 
   <script>
     const $ = (id) => document.getElementById(id);
-    const out = (msg) => { $('output').textContent += '\n' + msg; };
+    const t = $('transcript');
     let sessionId = null;
     let findings = [];
 
+    function log(msg, cls = 'agent') {
+      const line = document.createElement('div');
+      line.className = `line ${cls}`;
+      line.textContent = msg;
+      t.appendChild(line);
+      t.scrollTop = t.scrollHeight;
+    }
+
     async function api(method, path, body) {
       const opts = { method };
-      if (body) {
+      if (body !== undefined) {
         opts.headers = { 'Content-Type': 'application/json' };
         opts.body = JSON.stringify(body);
       }
@@ -52,57 +161,158 @@
       return data;
     }
 
+    function enable(step, on) {
+      if (step === 'findings') $('findings').disabled = !on;
+      if (step === 'explain') $('explain').disabled = !on;
+      if (step === 'implement') $('implement').disabled = !on;
+    }
+
     $('start').onclick = async () => {
       const data = await api('POST', '/session');
       sessionId = data.id;
-      out('Session: ' + sessionId);
+      log(`Session created: ${sessionId}`, 'success');
     };
 
     $('set').onclick = async () => {
       const data = await api('POST', `/session/${sessionId}/repository`, { repository: $('repo').value });
-      out('Set: ' + data.repository_url);
+      log(`Repository set: ${data.repository}`, 'success');
     };
 
     $('confirm').onclick = async () => {
       const data = await api('POST', `/session/${sessionId}/confirm`);
-      out('Confirmed: ' + data.repository);
+      log(`Confirmed: ${data.repository}`, 'success');
+    };
+
+    $('preferences').onclick = async () => {
+      const data = await api('POST', `/session/${sessionId}/preferences`, {
+        scope: $('scope').value,
+        depth: $('depth').value,
+        allow_devin_implementation: true,
+      });
+      log(`Preferences set: ${data.scope}, ${data.depth}`, 'success');
     };
 
     $('analyze').onclick = async () => {
-      out('Analyzing...');
+      log('Starting analysis...');
       await api('POST', `/session/${sessionId}/analyze`);
+      pollAnalysis();
+    };
+
+    async function pollAnalysis() {
       const poll = setInterval(async () => {
         const data = await api('GET', `/session/${sessionId}/status`);
         if (data.status === 'completed') {
           clearInterval(poll);
-          const f = await api('GET', `/session/${sessionId}/findings`);
-          findings = f;
-          out('Findings (' + findings.length + '):');
-          findings.forEach((s, i) => {
-            out(`${i + 1}. [${s.devin_priority}] ${s.scenario} (${s.area})`);
-          });
+          log('Analysis complete.', 'success');
+          await getFindings();
         } else if (data.status === 'failed') {
           clearInterval(poll);
-          out('Analysis failed: ' + (data.error || 'unknown error'));
+          log('Analysis failed: ' + (data.error || 'unknown'), 'error');
+        } else {
+          log(`Analysis status: ${data.status}`);
         }
       }, 1000);
-    };
+    }
+
+    async function getFindings() {
+      findings = await api('GET', `/session/${sessionId}/findings`);
+      enable('findings', true);
+      enable('explain', true);
+      enable('implement', true);
+      log(`Found ${findings.length} missing scenario(s):`, 'success');
+      findings.forEach((s, i) => {
+        log(`${i + 1}. [${s.devin_priority}] ${s.scenario} (${s.area})`);
+      });
+    }
+
+    $('findings').onclick = getFindings;
 
     $('explain').onclick = async () => {
-      const idx = parseInt($('scenarioIdx').value, 10);
-      if (idx < 0 || idx >= findings.length) { out('No scenario at index ' + idx); return; }
-      out('Explaining scenario at index ' + idx + '...');
-      const data = await api('POST', `/session/${sessionId}/explain`, { scenario_index: idx });
-      out('Explanation: ' + data.explanation);
+      if (!findings.length) { log('No findings yet.', 'error'); return; }
+      const data = await api('POST', `/session/${sessionId}/explain`, { scenario_index: 0 });
+      log(`Top scenario: ${data.explanation}`);
     };
 
     $('implement').onclick = async () => {
-      const idx = parseInt($('scenarioIdx').value, 10);
-      const scenario = findings[idx];
-      if (!scenario) { out('No scenario at index ' + idx); return; }
-      out('Implementing scenario: ' + scenario.scenario);
-      const data = await api('POST', `/session/${sessionId}/scenarios/${scenario.id}/implement`);
-      out('Result: ' + data.passed + ' passed, ' + data.failed + ' failed. ' + data.summary);
+      if (!findings.length) { log('No findings yet.', 'error'); return; }
+      const top = findings[0];
+      log(`Implementing: ${top.scenario}`);
+      const data = await api('POST', `/session/${sessionId}/scenarios/${top.id}/implement`);
+      log(`${data.passed} passed, ${data.failed} failed. ${data.summary}`, data.failed ? 'error' : 'success');
+    };
+
+    $('reset').onclick = () => {
+      sessionId = null;
+      findings = [];
+      t.innerHTML = '';
+      enable('findings', false);
+      enable('explain', false);
+      enable('implement', false);
+    };
+
+    $('autopilot').onclick = async () => {
+      try {
+        $('autopilot').disabled = true;
+        $('reset').click();
+
+        const repo = $('repo').value;
+        const scope = $('scope').value;
+        const depth = $('depth').value;
+
+        log(`User: analyze ${repo}, scope ${scope}, depth ${depth}, implement approved`, 'user');
+
+        const session = await api('POST', '/session');
+        sessionId = session.id;
+        log(`Agent: Created session ${sessionId}`);
+
+        await api('POST', `/session/${sessionId}/repository`, { repository: repo });
+        log(`Agent: Set repository to ${repo}`);
+
+        await api('POST', `/session/${sessionId}/confirm`);
+        log('Agent: Repository confirmed');
+
+        await api('POST', `/session/${sessionId}/preferences`, { scope, depth, allow_devin_implementation: true });
+        log('Agent: Preferences saved');
+
+        log('Agent: Starting analysis');
+        await api('POST', `/session/${sessionId}/analyze`);
+
+        await new Promise((resolve, reject) => {
+          const poll = setInterval(async () => {
+            const data = await api('GET', `/session/${sessionId}/status`);
+            if (data.status === 'completed') {
+              clearInterval(poll);
+              resolve();
+            } else if (data.status === 'failed') {
+              clearInterval(poll);
+              reject(new Error(data.error || 'analysis failed'));
+            } else {
+              log(`Agent: analysis ${data.status}`);
+            }
+          }, 1000);
+        });
+
+        findings = await api('GET', `/session/${sessionId}/findings`);
+        enable('findings', true);
+        enable('explain', true);
+        enable('implement', true);
+        log(`Agent: Found ${findings.length} missing scenario(s)`);
+        findings.forEach((s, i) => {
+          log(`${i + 1}. [${s.devin_priority}] ${s.scenario} (${s.area})`);
+        });
+
+        const explained = await api('POST', `/session/${sessionId}/explain`, { scenario_index: 0 });
+        log(`Agent: ${explained.explanation}`);
+
+        const top = findings[0];
+        log(`Agent: Implementing top scenario`);
+        const result = await api('POST', `/session/${sessionId}/scenarios/${top.id}/implement`);
+        log(`Agent: ${result.passed} passed, ${result.failed} failed. ${result.summary}`, result.failed ? 'error' : 'success');
+      } catch (err) {
+        log('Autopilot stopped: ' + err.message, 'error');
+      } finally {
+        $('autopilot').disabled = false;
+      }
     };
   </script>
 </body>
