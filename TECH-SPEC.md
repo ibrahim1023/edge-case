@@ -60,7 +60,6 @@ FastAPI Backend (edgecase.main:app)
 
 The project is scoped to be demoable in a single day by cutting scope aggressively:
 
-- **Mock-first:** all three external APIs have deterministic fallbacks, so the backend works end-to-end before any keys are configured.
 - **Public repos only:** no auth, no private clone, no multi-repo support.
 - **Lightweight analysis:** keyword matching + `ast` imports, not expensive static analysis.
 - **Top 5 scenarios, one implementation:** the engine returns the five most important gaps and can implement exactly one per session.
