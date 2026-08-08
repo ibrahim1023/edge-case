@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from enum import StrEnum
 from pathlib import Path
+from typing import Literal
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
@@ -111,3 +112,5 @@ class Session(BaseModel):
     validated_scenarios: list[ValidatedScenario] = []
     selected_scenario: ValidatedScenario | None = None
     implementation_result: ImplementationResult | None = None
+    analysis_status: Literal["pending", "running", "completed", "failed"] = "pending"
+    analysis_error: str | None = None

@@ -29,6 +29,7 @@
   <div class="step">
     <input id="scenarioIdx" type="number" value="0" min="0" max="4" />
     <button id="implement">Implement Selected</button>
+    <button id="explain">Explain Selected</button>
   </div>
 
   <pre id="output"></pre>
@@ -69,12 +70,30 @@
 
     $('analyze').onclick = async () => {
       out('Analyzing...');
-      const data = await api('POST', `/session/${sessionId}/analyze`);
-      findings = data.validated_scenarios;
-      out('Findings (' + findings.length + '):');
-      findings.forEach((s, i) => {
-        out(`${i + 1}. [${s.devin_priority}] ${s.scenario} (${s.area})`);
-      });
+      await api('POST', `/session/${sessionId}/analyze`);
+      const poll = setInterval(async () => {
+        const data = await api('GET', `/session/${sessionId}/status`);
+        if (data.status === 'completed') {
+          clearInterval(poll);
+          const f = await api('GET', `/session/${sessionId}/findings`);
+          findings = f;
+          out('Findings (' + findings.length + '):');
+          findings.forEach((s, i) => {
+            out(`${i + 1}. [${s.devin_priority}] ${s.scenario} (${s.area})`);
+          });
+        } else if (data.status === 'failed') {
+          clearInterval(poll);
+          out('Analysis failed: ' + (data.error || 'unknown error'));
+        }
+      }, 1000);
+    };
+
+    $('explain').onclick = async () => {
+      const idx = parseInt($('scenarioIdx').value, 10);
+      if (idx < 0 || idx >= findings.length) { out('No scenario at index ' + idx); return; }
+      out('Explaining scenario at index ' + idx + '...');
+      const data = await api('POST', `/session/${sessionId}/explain`, { scenario_index: idx });
+      out('Explanation: ' + data.explanation);
     };
 
     $('implement').onclick = async () => {
