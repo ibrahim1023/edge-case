@@ -12,7 +12,7 @@ class ExplainInput(BaseModel):
     scenario_index: int = 0
 
 
-@router.post("/{id}/explain")
+@router.post("/{id}/explain", summary="Convert a finding into a spoken summary")
 def explain(id: UUID, body: ExplainInput) -> dict:
     session = store.get(id)
     if not session or not session.validated_scenarios:

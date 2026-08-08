@@ -13,7 +13,7 @@ class RepositoryInput(BaseModel):
     repository: str
 
 
-@router.post("/{id}/repository", response_model=Session)
+@router.post("/{id}/repository", response_model=Session, summary="Set repository in owner/repo format")
 def set_repository(id: UUID, body: RepositoryInput) -> Session:
     session = store.get(id)
     if not session:

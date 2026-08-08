@@ -8,7 +8,7 @@ from edgecase.state import store
 router = APIRouter(prefix="/session", tags=["session"])
 
 
-@router.post("", response_model=Session)
+@router.post("", response_model=Session, summary="Create a new analysis session")
 def create_session() -> Session:
     return store.create()
 

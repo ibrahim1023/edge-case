@@ -45,7 +45,7 @@ def _run_analysis(
     store.save(session)
 
 
-@router.post("/{id}/analyze", response_model=Session)
+@router.post("/{id}/analyze", response_model=Session, summary="Start async repo analysis and scenario discovery")
 def analyze(id: UUID, background_tasks: BackgroundTasks) -> Session:
     session = store.get(id)
     if not session or not session.repository_confirmed:

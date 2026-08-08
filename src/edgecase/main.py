@@ -15,7 +15,11 @@ from edgecase.api import (
     webhooks,
 )
 
-app = FastAPI(title="EdgeCase", version="0.1.0")
+app = FastAPI(
+    title="EdgeCase",
+    description="Voice-first AI agent that discovers the most important missing pytest scenarios in public Python GitHub repositories.",
+    version="0.1.0",
+)
 
 app.include_router(session.router)
 app.include_router(repository.router)

@@ -8,7 +8,7 @@ from edgecase.state import store
 router = APIRouter(prefix="/session", tags=["findings"])
 
 
-@router.get("/{id}/findings", response_model=list[ValidatedScenario])
+@router.get("/{id}/findings", response_model=list[ValidatedScenario], summary="Get the top validated missing test scenarios")
 def findings(id: UUID) -> list[ValidatedScenario]:
     session = store.get(id)
     if not session:

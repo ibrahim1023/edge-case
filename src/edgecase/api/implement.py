@@ -10,7 +10,7 @@ router = APIRouter(prefix="/session", tags=["implement"])
 engine = ScenarioEngine()
 
 
-@router.post("/{id}/scenarios/{scenario_id}/implement", response_model=ImplementationResult)
+@router.post("/{id}/scenarios/{scenario_id}/implement", response_model=ImplementationResult, summary="Implement and run tests for a scenario")
 def implement(id: UUID, scenario_id: UUID) -> ImplementationResult:
     session = store.get(id)
     if not session or not session.repo_analysis:

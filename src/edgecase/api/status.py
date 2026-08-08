@@ -7,7 +7,7 @@ from edgecase.state import store
 router = APIRouter(prefix="/session", tags=["status"])
 
 
-@router.get("/{id}/status")
+@router.get("/{id}/status", summary="Check analysis progress")
 def status(id: UUID) -> dict:
     session = store.get(id)
     if not session:
