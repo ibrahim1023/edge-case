@@ -533,6 +533,7 @@
     }
 
     window.create_session = async () => {
+      log('Tool: create_session');
       const session = await api('POST', '/session');
       sessionId = session.id;
       setStatus('created');
@@ -540,18 +541,21 @@
     };
 
     window.set_repository = async (args) => {
+      log(`Tool: set_repository(${args.repository})`);
       const data = await api('POST', `/session/${args.session_id}/repository`, { repository: args.repository });
       await refreshSession();
       return { repository: data.repository, confirmed: false };
     };
 
     window.confirm_repository = async (args) => {
+      log('Tool: confirm_repository');
       const data = await api('POST', `/session/${args.session_id}/confirm`);
       await refreshSession();
       return { repository: data.repository, confirmed: true };
     };
 
     window.set_preferences = async (args) => {
+      log(`Tool: set_preferences(${args.scope}, ${args.depth})`);
       await api('POST', `/session/${args.session_id}/preferences`, {
         scope: args.scope,
         depth: args.depth,
@@ -561,6 +565,7 @@
     };
 
     window.start_analysis = async (args) => {
+      log('Tool: start_analysis');
       await api('POST', `/session/${args.session_id}/analyze`);
       return { status: 'running' };
     };
@@ -570,15 +575,18 @@
     };
 
     window.get_findings = async (args) => {
+      log('Tool: get_findings');
       const f = await api('GET', `/session/${args.session_id}/findings`);
       return { findings: f };
     };
 
     window.explain_scenario = async (args) => {
+      log(`Tool: explain_scenario(${args.scenario_index})`);
       return await api('POST', `/session/${args.session_id}/explain`, { scenario_index: args.scenario_index });
     };
 
     window.implement_scenario = async (args) => {
+      log(`Tool: implement_scenario(${args.scenario_id})`);
       return await api('POST', `/session/${args.session_id}/scenarios/${args.scenario_id}/implement`);
     };
 
