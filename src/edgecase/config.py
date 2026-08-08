@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     context_dev_api_key: str | None = None
     context_dev_base_url: str = "https://api.context.dev/v1"
     devin_token: str | None = None
+    devin_org_id: str | None = None
     devin_base_url: str = "https://api.devin.ai/v3"
     github_token: str | None = None
     use_mocks: bool = True

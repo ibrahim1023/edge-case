@@ -60,19 +60,40 @@ class ContextDevClient:
         self.api_key = settings.context_dev_api_key
         self.base_url = settings.context_dev_base_url.rstrip("/")
         self.use_mocks = settings.use_mocks or not self.api_key
+        self.client = httpx.Client(
+            headers={"Authorization": f"Bearer {self.api_key}"},
+            timeout=30,
+            follow_redirects=True,
+        )
+
+    def _request(self, method: str, path: str, **kwargs) -> httpx.Response:
+        url = f"{self.base_url}{path}"
+        last_exc = None
+        for attempt in range(3):
+            try:
+                response = self.client.request(method, url, **kwargs)
+                if response.status_code in (429, 500, 502, 503, 504):
+                    logger.warning(f"Context.dev {response.status_code} on {url}; retry {attempt + 1}/3")
+                    last_exc = httpx.HTTPStatusError("transient error", request=response.request, response=response)
+                    continue
+                response.raise_for_status()
+                return response
+            except httpx.HTTPError as exc:
+                logger.warning(f"Context.dev request failed: {exc}; retry {attempt + 1}/3")
+                last_exc = exc
+        raise last_exc or httpx.HTTPError(f"Context.dev request to {url} failed")
 
     def _scrape(self, target_url: str) -> str:
         """Scrape a web page and return its main-content markdown."""
+        params = urlencode({
+            "url": target_url,
+            "useMainContentOnly": "true",
+            "tags": "edgecase",
+        })
         try:
-            params = urlencode({"url": target_url, "useMainContentOnly": "true"})
-            response = httpx.get(
-                f"{self.base_url}/web/scrape/markdown?{params}",
-                headers={"Authorization": f"Bearer {self.api_key}"},
-                timeout=30,
-            )
-            response.raise_for_status()
+            response = self._request("GET", f"/web/scrape/markdown?{params}")
             return response.text
-        except Exception as exc:
+        except httpx.HTTPError as exc:
             logger.warning(f"Context.dev scrape failed for {target_url}: {exc}")
             return ""
 
