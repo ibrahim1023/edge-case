@@ -33,7 +33,6 @@ htmlcov/
 
 # Project-specific files you may not want to commit
 Product Spec.md
-Task.md
 .devin/
 
 # Cloned repos if you ever set REPO_CLONE_DIR inside the project

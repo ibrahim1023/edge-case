@@ -156,12 +156,21 @@ class ScenarioEngine:
             str(analysis.repo_path / "src")
         ]
 
+        why_parts = []
+        if official:
+            why_parts.append(f"{official[0]}")
+        if similar:
+            why_parts.append(f"Common pattern in similar projects: {similar[0]}.")
+        if bugs:
+            why_parts.append(f"Documented regression: {bugs[0]}.")
+        why_it_matters = " ".join(why_parts) or f"{scenario_text} is a common source of bugs in {fingerprint.domain} projects."
+
         return CandidateScenario(
             category=template["category"],
             area=area,
             scenario=scenario_text,
             priority=template["priority"],
-            why_it_matters=f"{scenario_text} is a common source of bugs in {fingerprint.domain} projects.",
+            why_it_matters=why_it_matters,
             repo_evidence=[f"Repo uses {integration}", f"Frameworks: {', '.join(fingerprint.frameworks)}"],
             official_evidence=official[:2] or [f"{f} testing best practices" for f in fingerprint.frameworks[:2]],
             similar_project_evidence=similar[:3],
