@@ -578,16 +578,34 @@
     window.start_analysis = async (args) => {
       log('Tool: start_analysis');
       await api('POST', `/session/${args.session_id}/analyze`);
+
+      const poll = setInterval(async () => {
+        const data = await api('GET', `/session/${args.session_id}/status`);
+        log(`Analysis status: ${data.status}`);
+        if (data.status === 'completed') {
+          clearInterval(poll);
+          log('Analysis completed', 'success');
+          await refreshSession();
+        } else if (data.status === 'failed') {
+          clearInterval(poll);
+          log('Analysis failed: ' + (data.error || 'unknown'), 'error');
+        }
+      }, 1000);
+
       return { status: 'running' };
     };
 
     window.get_status = async (args) => {
-      return await api('GET', `/session/${args.session_id}/status`);
+      const data = await api('GET', `/session/${args.session_id}/status`);
+      log(`Tool: get_status -> ${data.status}`);
+      return data;
     };
 
     window.get_findings = async (args) => {
       log('Tool: get_findings');
       const f = await api('GET', `/session/${args.session_id}/findings`);
+      log(`Found ${f.length} scenario(s)`, 'success');
+      await refreshSession();
       return { findings: f };
     };
 
@@ -598,7 +616,10 @@
 
     window.implement_scenario = async (args) => {
       log(`Tool: implement_scenario(${args.scenario_id})`);
-      return await api('POST', `/session/${args.session_id}/scenarios/${args.scenario_id}/implement`);
+      const result = await api('POST', `/session/${args.session_id}/scenarios/${args.scenario_id}/implement`);
+      renderResult(result);
+      log(`${result.passed} passed, ${result.failed} failed`, result.failed ? 'error' : 'success');
+      return result;
     };
 
     log('UI initialized');
