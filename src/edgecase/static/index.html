@@ -229,6 +229,16 @@
   </main>
 
   <script>
+    window.addEventListener('error', (event) => {
+      const t = document.getElementById('transcript');
+      if (t) {
+        const line = document.createElement('div');
+        line.className = 'line error';
+        line.textContent = `JS error: ${event.message}`;
+        t.appendChild(line);
+      }
+    });
+
     const $ = (id) => document.getElementById(id);
     let sessionId = null;
 
@@ -488,6 +498,7 @@
           implement_scenario: window.implement_scenario,
         };
 
+        log('Registering client tools: ' + Object.keys(clientTools).join(', '));
         const cfg = await fetch('/config').then(r => r.json());
         voiceConversation = await Conversation.startSession({
           agentId: cfg.elevenlabs_agent_id,
@@ -590,6 +601,7 @@
       return await api('POST', `/session/${args.session_id}/scenarios/${args.scenario_id}/implement`);
     };
 
+    log('UI initialized');
     initVoice();
   </script>
 </body>
