@@ -191,17 +191,37 @@ class ScenarioEngine:
         candidates = [self._build_candidate(c, fingerprint, analysis, research) for c in categories]
         return candidates
 
+    def _priority_score(self, scenario: ValidatedScenario, fingerprint: ProjectFingerprint) -> int:
+        base = {Priority.CRITICAL: 400, Priority.HIGH: 300, Priority.MEDIUM: 200, Priority.LOW: 100}
+        score = base.get(scenario.devin_priority, 0)
+        if scenario.bug_regression_evidence:
+            score += 40
+        if scenario.official_evidence:
+            score += 30
+        if scenario.similar_project_evidence:
+            score += 20
+        if fingerprint.maturity == "mature" and scenario.category in {
+            "idempotency", "transaction_rollback", "provider_timeout",
+        }:
+            score += 15
+        if fingerprint.is_monorepo and scenario.category in {
+            "external_service_failure", "concurrent_requests", "invalid_input",
+        }:
+            score += 10
+        return score
+
     def validate_and_rank(
         self,
         repo_url: str,
         analysis: RepoAnalysis,
+        fingerprint: ProjectFingerprint,
         candidates: list[CandidateScenario],
     ) -> list[ValidatedScenario]:
         validated = []
         for c in candidates:
             v = self.devin.validate_scenario(repo_url, analysis.model_dump(), c)
             if v.devin_relevant:
+                v.priority_score = self._priority_score(v, fingerprint)
                 validated.append(v)
-        order = {Priority.CRITICAL: 0, Priority.HIGH: 1, Priority.MEDIUM: 2, Priority.LOW: 3}
-        validated.sort(key=lambda x: (order.get(x.devin_priority, 9), x.scenario))
+        validated.sort(key=lambda x: (-x.priority_score, x.scenario))
         return validated[:5]

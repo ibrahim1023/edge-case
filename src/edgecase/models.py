@@ -80,6 +80,7 @@ class CandidateScenario(BaseModel):
 class ValidatedScenario(CandidateScenario):
     devin_relevant: bool = True
     devin_priority: Priority = Priority.MEDIUM
+    priority_score: int = 0
     devin_reason: str = ""
     existing_coverage: str = ""
 

@@ -31,7 +31,7 @@ def _run_analysis(
         fingerprint = build_fingerprint(analysis)
         research = engine.context.research(fingerprint, session.repository_url or "")
         candidates = engine.generate_candidates(analysis, fingerprint, session.scope, research, session.repository_url or "")
-        validated = engine.validate_and_rank(repository_url, analysis, candidates)
+        validated = engine.validate_and_rank(repository_url, analysis, fingerprint, candidates)
 
         session.repo_analysis = analysis
         session.project_fingerprint = fingerprint

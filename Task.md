@@ -69,7 +69,7 @@ Legend: `[x]` = implemented, `[ ]` = not yet implemented.
 - [x] Select and rank top 5 scenarios
 - [x] Devin validation of relevance and priority
 - [x] Use real Context.dev evidence for `why_it_matters`
-- [ ] Improve priority scoring with more signals
+- [x] Improve priority scoring with more signals
 - [x] Make scenario categories aware of user `scope` preference
 
 ---
