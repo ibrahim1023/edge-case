@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import StrEnum
 from pathlib import Path
 from typing import Literal
@@ -102,7 +102,7 @@ class ImplementationResult(BaseModel):
 
 class Session(BaseModel):
     id: UUID = Field(default_factory=uuid4)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     repository: str | None = None
     repository_url: str | None = None
     repository_confirmed: bool = False

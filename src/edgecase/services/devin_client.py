@@ -239,6 +239,7 @@ def test_{scenario.category.replace(' ', '_')}_basic():
                 capture_output=True,
                 text=True,
                 timeout=120,
+                check=False,
             )
             passed = result.stdout.count(" passed")
             failed = result.stdout.count(" failed")

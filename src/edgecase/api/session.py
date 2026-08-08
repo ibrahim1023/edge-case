@@ -17,5 +17,5 @@ def create_session() -> Session:
 def get_session(id: UUID) -> Session:
     session = store.get(id)
     if not session:
-        raise HTTPException(status_code=404, detail="Session not found")  # noqa: F821
+        raise HTTPException(status_code=404, detail="Session not found")
     return session

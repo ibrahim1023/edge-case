@@ -5,7 +5,6 @@ import git
 
 from edgecase.config import settings
 
-
 CLONE_ROOT = settings.repo_clone_dir
 
 

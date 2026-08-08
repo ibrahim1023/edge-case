@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from uuid import UUID
 
@@ -23,13 +23,13 @@ class SessionStore:
             conn.execute("CREATE INDEX IF NOT EXISTS idx_expires ON sessions(expires_at)")
 
     def _now(self) -> float:
-        return datetime.now(timezone.utc).timestamp()
+        return datetime.now(UTC).timestamp()
 
     def _expiry(self) -> float:
         return self._now() + self._ttl_seconds
 
     def _expires_at(self) -> datetime:
-        return datetime.fromtimestamp(self._expiry(), tz=timezone.utc)
+        return datetime.fromtimestamp(self._expiry(), tz=UTC)
 
     def create(self) -> Session:
         session = Session()

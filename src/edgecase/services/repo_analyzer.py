@@ -4,7 +4,6 @@ from pathlib import Path
 
 from edgecase.models import RepoAnalysis
 
-
 DEPENDENCY_FILES = [
     "pyproject.toml",
     "requirements.txt",
@@ -119,9 +118,8 @@ def _extract_imports(source_files: list[Path]) -> set[str]:
             if isinstance(node, ast.Import):
                 for alias in node.names:
                     imports.add(alias.name.split(".")[0].lower())
-            elif isinstance(node, ast.ImportFrom):
-                if node.module:
-                    imports.add(node.module.split(".")[0].lower())
+            elif isinstance(node, ast.ImportFrom) and node.module:
+                imports.add(node.module.split(".")[0].lower())
     return imports
 
 

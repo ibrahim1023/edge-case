@@ -2,7 +2,6 @@ from pathlib import Path
 
 from edgecase.models import ProjectFingerprint, RepoAnalysis
 
-
 _MANIFEST_FILES = ("pyproject.toml", "setup.py", "setup.cfg")
 
 

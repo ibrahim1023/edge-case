@@ -10,7 +10,6 @@ from edgecase.models import (
 from edgecase.services.context_dev import ContextDevClient
 from edgecase.services.devin_client import DevinClient
 
-
 CATEGORY_MAP = {
     "api-service": ["invalid_input", "external_service_failure", "concurrent_requests", "boundary_conditions"],
     "cli-tool": ["invalid_input", "boundary_conditions"],
