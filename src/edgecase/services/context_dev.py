@@ -92,7 +92,8 @@ class ContextDevClient:
         })
         try:
             response = self._request("GET", f"/web/scrape/markdown?{params}")
-            return response.text
+            data = response.json()
+            return data.get("markdown") or data.get("content") or ""
         except httpx.HTTPError as exc:
             logger.warning(f"Context.dev scrape failed for {target_url}: {exc}")
             return ""
