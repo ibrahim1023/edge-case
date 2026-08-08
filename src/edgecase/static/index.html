@@ -12,30 +12,40 @@
       --text: #f1f5f9;
       --muted: #94a3b8;
       --accent: #38bdf8;
+      --accent-2: #818cf8;
       --success: #4ade80;
       --danger: #f87171;
     }
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
-      min-height: 100vh;
-      padding: 1rem;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-    h1 { margin: 0; }
-    p { color: var(--muted); margin: 0.25rem 0 1rem; }
-    .grid {
+    header {
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--panel-2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header h1 { margin: 0; font-size: 1.5rem; }
+    header span { color: var(--muted); font-size: 0.9rem; }
+    main {
+      flex: 1;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      margin-top: 1rem;
+      min-height: 0;
     }
     .panel {
-      background: var(--panel);
-      border-radius: 0.75rem;
-      padding: 1rem;
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
     }
+    .panel:first-child { border-right: 1px solid var(--panel-2); }
     .panel h2 { margin-top: 0; font-size: 1.1rem; color: var(--accent); }
     label { display: block; margin-top: 0.75rem; color: var(--muted); font-size: 0.85rem; }
     input, select {
@@ -46,6 +56,7 @@
       border-radius: 0.5rem;
       background: var(--bg);
       color: var(--text);
+      font-size: 0.95rem;
     }
     .row { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
     .row > * { flex: 1; }
@@ -57,42 +68,101 @@
       padding: 0.5rem 1rem;
       font-weight: 600;
       cursor: pointer;
+      font-size: 0.95rem;
     }
     button:disabled { opacity: 0.5; cursor: not-allowed; }
     button.secondary { background: var(--panel-2); color: var(--text); }
-    #transcript {
-      height: 260px;
-      overflow-y: auto;
-      background: var(--bg);
-      border-radius: 0.5rem;
-      padding: 0.75rem;
-      font-size: 0.9rem;
-      line-height: 1.4;
+    .card {
+      background: var(--panel);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
     }
-    #transcript .line { margin: 0.35rem 0; }
-    #transcript .line.user { color: var(--accent); }
-    #transcript .line.agent { color: var(--text); }
-    #transcript .line.success { color: var(--success); }
-    #transcript .line.error { color: var(--danger); }
+    .card h3 { margin: 0 0 0.5rem; font-size: 1rem; color: var(--accent-2); }
+    .card p, .card dl { margin: 0; color: var(--muted); font-size: 0.9rem; }
+    .card dl { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1rem; }
+    .card dt { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; }
+    .card dd { margin: 0; font-weight: 500; color: var(--text); }
+    .scenario {
+      display: grid;
+      grid-template-columns: 2.5rem 1fr;
+      gap: 0.75rem;
+      align-items: start;
+      margin-bottom: 1rem;
+    }
+    .scenario:last-child { margin-bottom: 0; }
+    .rank {
+      background: var(--panel-2);
+      border-radius: 0.5rem;
+      width: 2.5rem;
+      height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .scenario-title { font-weight: 600; }
+    .why { color: var(--muted); font-size: 0.88rem; margin: 0.25rem 0 0; }
+    .meta {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+    .pill {
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      background: var(--panel-2);
+    }
+    .pill.critical { color: var(--danger); border: 1px solid var(--danger); }
+    .pill.high { color: var(--danger); border: 1px solid var(--danger); }
+    .pill.medium { color: var(--accent); border: 1px solid var(--accent); }
+    .pill.low { color: var(--muted); border: 1px solid var(--muted); }
+    .transcript {
+      background: var(--panel);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      min-height: 260px;
+      max-height: 360px;
+      overflow-y: auto;
+      margin-bottom: 1.5rem;
+    }
+    .line { margin: 0.6rem 0; }
+    .line.user { color: var(--accent); }
+    .line.agent { color: var(--text); }
+    .line.success { color: var(--success); }
+    .line.error { color: var(--danger); }
     .note { color: var(--muted); font-size: 0.85rem; }
+    #result-card { border: 1px solid transparent; }
+    #result-card.ok { border-color: var(--success); }
+    #result-card.fail { border-color: var(--danger); }
+    .hidden { display: none; }
     @media (max-width: 900px) {
-      .grid { grid-template-columns: 1fr; }
+      main { grid-template-columns: 1fr; }
+      .panel:first-child { border-right: none; border-bottom: 1px solid var(--panel-2); }
     }
   </style>
 </head>
 <body>
-  <h1>EdgeCase</h1>
-  <p>Discover the most important missing pytest scenarios for any public Python GitHub repo.</p>
+  <header>
+    <h1>EdgeCase <span>— missing pytest scenario finder</span></h1>
+    <span id="status-badge" class="pill low">no session</span>
+  </header>
 
-  <div class="grid">
-    <div class="panel">
+  <main>
+    <section class="panel">
       <h2>Voice</h2>
-      <p class="note">When an <code>ELEVENLABS_AGENT_ID</code> is configured, the ElevenLabs widget appears here and can drive the whole flow by voice.</p>
+      <p class="note">When <code>ELEVENLABS_AGENT_ID</code> is configured, the widget appears here and drives the flow by voice.</p>
       <div id="widget-host"></div>
-    </div>
 
-    <div class="panel">
-      <h2>Text Fallback</h2>
+      <h2 style="margin-top:1.5rem;">Live transcript</h2>
+      <div id="transcript" class="transcript"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Controls</h2>
 
       <label for="repo">Repository (owner/repo)</label>
       <input id="repo" type="text" value="ibrahim1023/ci-rootcause" />
@@ -117,36 +187,57 @@
         <button id="reset" class="secondary">Reset</button>
       </div>
 
-      <label>Manual steps</label>
-      <div class="row">
-        <button id="start">1. Session</button>
-        <button id="set">2. Repo</button>
-        <button id="confirm">3. Confirm</button>
-        <button id="preferences">4. Prefs</button>
-      </div>
-      <div class="row">
-        <button id="analyze">5. Analyze</button>
-        <button id="findings" disabled>6. Findings</button>
-        <button id="explain" disabled>7. Explain</button>
-        <button id="implement" disabled>8. Implement</button>
+      <details style="margin-top:1rem;color:var(--muted);">
+        <summary>Manual steps</summary>
+        <div class="row">
+          <button id="start">1. Session</button>
+          <button id="set">2. Repo</button>
+          <button id="confirm">3. Confirm</button>
+          <button id="preferences">4. Prefs</button>
+        </div>
+        <div class="row" style="margin-top:0.5rem;">
+          <button id="analyze">5. Analyze</button>
+          <button id="explain">6. Explain</button>
+          <button id="implement">7. Implement</button>
+        </div>
+      </details>
+
+      <h2 style="margin-top:1.5rem;">Repository</h2>
+      <div id="repo-card" class="card hidden">
+        <h3 id="repo-name">—</h3>
+        <dl>
+          <dt>Status</dt><dd id="repo-status">—</dd>
+          <dt>Project type</dt><dd id="repo-type">—</dd>
+          <dt>Maturity</dt><dd id="repo-maturity">—</dd>
+          <dt>Architecture</dt><dd id="repo-arch">—</dd>
+          <dt>Domain</dt><dd id="repo-domain">—</dd>
+          <dt>Existing tests</dt><dd id="repo-tests">—</dd>
+        </dl>
       </div>
 
-      <div id="transcript"></div>
-    </div>
-  </div>
+      <h2>Findings</h2>
+      <div id="findings-card" class="card hidden">
+        <div id="findings-list"></div>
+      </div>
+
+      <h2>Implementation</h2>
+      <div id="result-card" class="card hidden">
+        <h3 id="result-title">Result</h3>
+        <p id="result-body"></p>
+      </div>
+    </section>
+  </main>
 
   <script>
     const $ = (id) => document.getElementById(id);
-    const t = $('transcript');
     let sessionId = null;
-    let findings = [];
 
     function log(msg, cls = 'agent') {
       const line = document.createElement('div');
       line.className = `line ${cls}`;
       line.textContent = msg;
-      t.appendChild(line);
-      t.scrollTop = t.scrollHeight;
+      $('transcript').appendChild(line);
+      $('transcript').scrollTop = $('transcript').scrollHeight;
     }
 
     async function api(method, path, body) {
@@ -161,35 +252,94 @@
       return data;
     }
 
-    function enable(step, on) {
-      if (step === 'findings') $('findings').disabled = !on;
-      if (step === 'explain') $('explain').disabled = !on;
-      if (step === 'implement') $('implement').disabled = !on;
+    function setStatus(text) {
+      $('status-badge').textContent = text;
+    }
+
+    function renderRepo(session) {
+      const fp = session.project_fingerprint || {};
+      const ra = session.repo_analysis || {};
+      $('repo-name').textContent = session.repository || '—';
+      $('repo-status').textContent = session.analysis_status;
+      $('repo-type').textContent = fp.project_type || '—';
+      $('repo-maturity').textContent = fp.maturity || '—';
+      $('repo-arch').textContent = fp.architecture || '—';
+      $('repo-domain').textContent = fp.domain || '—';
+      $('repo-tests').textContent = ra.existing_tests_summary || '—';
+      $('repo-card').classList.remove('hidden');
+    }
+
+    function renderFindings(scenarios) {
+      const list = $('findings-list');
+      list.innerHTML = '';
+      if (!scenarios || !scenarios.length) {
+        list.innerHTML = '<p>No findings yet.</p>';
+      } else {
+        scenarios.forEach((s, i) => {
+          const div = document.createElement('div');
+          div.className = 'scenario';
+          div.innerHTML = `
+            <div class="rank">${i + 1}</div>
+            <div>
+              <div class="scenario-title">${s.scenario}</div>
+              <p class="why">${s.why_it_matters}</p>
+              <div class="meta">
+                <span class="pill ${s.devin_priority.toLowerCase()}">${s.devin_priority}</span>
+                <span class="pill">score ${s.priority_score || 0}</span>
+                <span class="pill">${s.category}</span>
+                <span class="pill">${s.area}</span>
+              </div>
+            </div>
+          `;
+          list.appendChild(div);
+        });
+      }
+      $('findings-card').classList.remove('hidden');
+    }
+
+    function renderResult(result) {
+      $('result-card').classList.remove('hidden', 'ok', 'fail');
+      const ok = result.failed === 0;
+      $('result-card').classList.add(ok ? 'ok' : 'fail');
+      $('result-body').textContent = `${result.passed} passed, ${result.failed} failed. ${result.summary}`;
+    }
+
+    async function refreshSession() {
+      if (!sessionId) return;
+      const session = await api('GET', `/session/${sessionId}`);
+      renderRepo(session);
+      if (session.validated_scenarios && session.validated_scenarios.length) {
+        renderFindings(session.validated_scenarios);
+      }
+      setStatus(session.analysis_status);
     }
 
     $('start').onclick = async () => {
       const data = await api('POST', '/session');
       sessionId = data.id;
-      log(`Session created: ${sessionId}`, 'success');
+      setStatus('created');
+      log(`Session: ${sessionId}`, 'success');
     };
 
     $('set').onclick = async () => {
       const data = await api('POST', `/session/${sessionId}/repository`, { repository: $('repo').value });
       log(`Repository set: ${data.repository}`, 'success');
+      await refreshSession();
     };
 
     $('confirm').onclick = async () => {
-      const data = await api('POST', `/session/${sessionId}/confirm`);
-      log(`Confirmed: ${data.repository}`, 'success');
+      await api('POST', `/session/${sessionId}/confirm`);
+      log('Repository confirmed', 'success');
+      await refreshSession();
     };
 
     $('preferences').onclick = async () => {
-      const data = await api('POST', `/session/${sessionId}/preferences`, {
+      await api('POST', `/session/${sessionId}/preferences`, {
         scope: $('scope').value,
         depth: $('depth').value,
         allow_devin_implementation: true,
       });
-      log(`Preferences set: ${data.scope}, ${data.depth}`, 'success');
+      log('Preferences saved', 'success');
     };
 
     $('analyze').onclick = async () => {
@@ -201,53 +351,42 @@
     async function pollAnalysis() {
       const poll = setInterval(async () => {
         const data = await api('GET', `/session/${sessionId}/status`);
+        setStatus(data.status);
         if (data.status === 'completed') {
           clearInterval(poll);
-          log('Analysis complete.', 'success');
-          await getFindings();
+          log('Analysis complete', 'success');
+          await refreshSession();
         } else if (data.status === 'failed') {
           clearInterval(poll);
           log('Analysis failed: ' + (data.error || 'unknown'), 'error');
-        } else {
-          log(`Analysis status: ${data.status}`);
         }
       }, 1000);
     }
 
-    async function getFindings() {
-      findings = await api('GET', `/session/${sessionId}/findings`);
-      enable('findings', true);
-      enable('explain', true);
-      enable('implement', true);
-      log(`Found ${findings.length} missing scenario(s):`, 'success');
-      findings.forEach((s, i) => {
-        log(`${i + 1}. [${s.devin_priority}] ${s.scenario} (${s.area})`);
-      });
-    }
-
-    $('findings').onclick = getFindings;
-
     $('explain').onclick = async () => {
+      const findings = (await api('GET', `/session/${sessionId}/findings`));
       if (!findings.length) { log('No findings yet.', 'error'); return; }
       const data = await api('POST', `/session/${sessionId}/explain`, { scenario_index: 0 });
       log(`Top scenario: ${data.explanation}`);
     };
 
     $('implement').onclick = async () => {
+      const findings = (await api('GET', `/session/${sessionId}/findings`));
       if (!findings.length) { log('No findings yet.', 'error'); return; }
       const top = findings[0];
       log(`Implementing: ${top.scenario}`);
-      const data = await api('POST', `/session/${sessionId}/scenarios/${top.id}/implement`);
-      log(`${data.passed} passed, ${data.failed} failed. ${data.summary}`, data.failed ? 'error' : 'success');
+      const result = await api('POST', `/session/${sessionId}/scenarios/${top.id}/implement`);
+      renderResult(result);
+      log(`${result.passed} passed, ${result.failed} failed`, result.failed ? 'error' : 'success');
     };
 
     $('reset').onclick = () => {
       sessionId = null;
-      findings = [];
-      t.innerHTML = '';
-      enable('findings', false);
-      enable('explain', false);
-      enable('implement', false);
+      $('transcript').innerHTML = '';
+      $('repo-card').classList.add('hidden');
+      $('findings-card').classList.add('hidden');
+      $('result-card').classList.add('hidden', 'ok', 'fail');
+      setStatus('no session');
     };
 
     $('autopilot').onclick = async () => {
@@ -259,27 +398,30 @@
         const scope = $('scope').value;
         const depth = $('depth').value;
 
-        log(`User: analyze ${repo}, scope ${scope}, depth ${depth}, implement approved`, 'user');
+        log(`User: analyze ${repo}, scope ${scope}, depth ${depth}`, 'user');
 
         const session = await api('POST', '/session');
         sessionId = session.id;
-        log(`Agent: Created session ${sessionId}`);
+        setStatus('created');
+        log(`Agent: created session ${sessionId}`);
 
         await api('POST', `/session/${sessionId}/repository`, { repository: repo });
-        log(`Agent: Set repository to ${repo}`);
+        log(`Agent: set repository to ${repo}`);
+        await refreshSession();
 
         await api('POST', `/session/${sessionId}/confirm`);
-        log('Agent: Repository confirmed');
+        log('Agent: repository confirmed');
 
         await api('POST', `/session/${sessionId}/preferences`, { scope, depth, allow_devin_implementation: true });
-        log('Agent: Preferences saved');
+        log('Agent: preferences saved');
 
-        log('Agent: Starting analysis');
+        log('Agent: starting analysis');
         await api('POST', `/session/${sessionId}/analyze`);
 
         await new Promise((resolve, reject) => {
           const poll = setInterval(async () => {
             const data = await api('GET', `/session/${sessionId}/status`);
+            setStatus(data.status);
             if (data.status === 'completed') {
               clearInterval(poll);
               resolve();
@@ -292,22 +434,17 @@
           }, 1000);
         });
 
-        findings = await api('GET', `/session/${sessionId}/findings`);
-        enable('findings', true);
-        enable('explain', true);
-        enable('implement', true);
-        log(`Agent: Found ${findings.length} missing scenario(s)`);
-        findings.forEach((s, i) => {
-          log(`${i + 1}. [${s.devin_priority}] ${s.scenario} (${s.area})`);
-        });
+        log('Agent: analysis complete', 'success');
+        await refreshSession();
 
         const explained = await api('POST', `/session/${sessionId}/explain`, { scenario_index: 0 });
         log(`Agent: ${explained.explanation}`);
 
-        const top = findings[0];
-        log(`Agent: Implementing top scenario`);
+        const top = (await api('GET', `/session/${sessionId}/findings`))[0];
+        log(`Agent: implementing top scenario`);
         const result = await api('POST', `/session/${sessionId}/scenarios/${top.id}/implement`);
-        log(`Agent: ${result.passed} passed, ${result.failed} failed. ${result.summary}`, result.failed ? 'error' : 'success');
+        renderResult(result);
+        log(`Agent: ${result.passed} passed, ${result.failed} failed`, result.failed ? 'error' : 'success');
       } catch (err) {
         log('Autopilot stopped: ' + err.message, 'error');
       } finally {
