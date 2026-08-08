@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EdgeCase — Card Layout Mockup</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --panel-2: #334155;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-2: #818cf8;
+      --success: #4ade80;
+      --danger: #f87171;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--panel-2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header h1 { margin: 0; font-size: 1.5rem; }
+    header span { color: var(--muted); font-size: 0.9rem; }
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 0;
+    }
+    .panel {
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+    }
+    .panel:first-child { border-right: 1px solid var(--panel-2); }
+    .panel h2 { margin-top: 0; font-size: 1.1rem; color: var(--accent); }
+    .card {
+      background: var(--panel);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .card h3 { margin: 0 0 0.5rem; font-size: 1rem; color: var(--accent-2); }
+    .card dl { margin: 0; }
+    .card dt { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; margin-top: 0.5rem; }
+    .card dd { margin: 0.15rem 0 0; font-weight: 500; }
+    .scenario {
+      display: grid;
+      grid-template-columns: 3rem 1fr;
+      gap: 0.75rem;
+      align-items: start;
+    }
+    .rank {
+      background: var(--panel-2);
+      border-radius: 0.5rem;
+      width: 2.5rem;
+      height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .meta {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+    .pill {
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      background: var(--panel-2);
+    }
+    .pill.priority-high { color: var(--danger); border: 1px solid var(--danger); }
+    .pill.priority-medium { color: var(--accent); border: 1px solid var(--accent); }
+    .pill.priority-low { color: var(--muted); border: 1px solid var(--muted); }
+    .transcript {
+      background: var(--panel);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      min-height: 260px;
+      margin-bottom: 1.5rem;
+    }
+    .message { margin: 0.6rem 0; }
+    .message .bubble {
+      display: inline-block;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.75rem;
+      background: var(--panel-2);
+      max-width: 85%;
+    }
+    .message.user { text-align: right; }
+    .message.user .bubble { background: var(--accent); color: #0f172a; }
+    .mic {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+    }
+    @media (max-width: 900px) {
+      main { grid-template-columns: 1fr; }
+      .panel:first-child { border-right: none; border-bottom: 1px solid var(--panel-2); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>EdgeCase <span>— missing pytest scenario finder</span></h1>
+    <span>Card layout mockup</span>
+  </header>
+  <main>
+    <section class="panel">
+      <h2>Voice</h2>
+      <div class="transcript">
+        <div class="message user"><div class="bubble">“analyze pypa slash packaging, whole project, highest value.”</div></div>
+        <div class="message"><div class="bubble">Confirmed. I'll analyze pypa/packaging and implement approved tests. Starting now.</div></div>
+      </div>
+      <button class="mic" aria-label="Hold to talk">MIC</button>
+      <p style="text-align:center;color:var(--muted);font-size:0.9rem;">Listening…</p>
+    </section>
+
+    <section class="panel">
+      <h2>Details & Findings</h2>
+
+      <div class="card">
+        <h3>Repository</h3>
+        <dl>
+          <dt>Owner / Repo</dt>
+          <dd>pypa / packaging</dd>
+          <dt>Status</dt>
+          <dd>Analysis completed</dd>
+          <dt>Project type</dt>
+          <dd>library</dd>
+          <dt>Maturity</dt>
+          <dd>mature · 127 tests across 12 files</dd>
+          <dt>Architecture</dt>
+          <dd>plain-modules</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <h3>Top missing scenarios</h3>
+
+        <div class="scenario" style="margin-bottom:1rem;">
+          <div class="rank">1</div>
+          <div>
+            <strong>Invalid input should return a clear error</strong>
+            <p style="margin:0.25rem 0;color:var(--muted);font-size:0.9rem;">Official guidance: version specifiers must reject malformed inputs. Common pattern in similar projects: invalid specifier handling.</p>
+            <div class="meta">
+              <span class="pill priority-high">HIGH</span>
+              <span class="pill">score 455</span>
+              <span class="pill">invalid_input</span>
+              <span class="pill">API</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario" style="margin-bottom:1rem;">
+          <div class="rank">2</div>
+          <div>
+            <strong>Boundary values should be handled correctly</strong>
+            <p style="margin:0.25rem 0;color:var(--muted);font-size:0.9rem;">Documented regression: missing bounds checks caused a release blocker.</p>
+            <div class="meta">
+              <span class="pill priority-medium">MEDIUM</span>
+              <span class="pill">score 320</span>
+              <span class="pill">boundary_conditions</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div class="rank">3</div>
+          <div>
+            <strong>Concurrent requests should not corrupt state</strong>
+            <p style="margin:0.25rem 0;color:var(--muted);font-size:0.9rem;">Common pattern in similar projects: parallel access to marker collections.</p>
+            <div class="meta">
+              <span class="pill priority-medium">MEDIUM</span>
+              <span class="pill">score 215</span>
+              <span class="pill">concurrent_requests</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="border:1px solid var(--success);">
+        <h3>Implementation result</h3>
+        <p style="margin:0.25rem 0;color:var(--muted);">Implemented test for the top scenario and ran pytest.</p>
+        <p style="margin:0.5rem 0;font-weight:600;color:var(--success);">1 passed, 0 failed</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

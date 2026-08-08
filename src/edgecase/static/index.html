@@ -361,9 +361,14 @@
     };
 
     async function pollAnalysis() {
+      let lastDetail = '';
       const poll = setInterval(async () => {
         const data = await api('GET', `/session/${sessionId}/status`);
         setStatus(data.status);
+        if (data.detail && data.detail !== lastDetail) {
+          lastDetail = data.detail;
+          log(`Analysis: ${data.detail}`);
+        }
         if (data.status === 'completed') {
           clearInterval(poll);
           log('Analysis complete', 'success');
@@ -581,9 +586,13 @@
       log('Tool: start_analysis');
       await api('POST', `/session/${args.session_id}/analyze`);
 
+      let lastDetail = '';
       const poll = setInterval(async () => {
         const data = await api('GET', `/session/${args.session_id}/status`);
-        log(`Analysis status: ${data.status}`);
+        if (data.detail && data.detail !== lastDetail) {
+          lastDetail = data.detail;
+          log(`Analysis: ${data.detail}`);
+        }
         if (data.status === 'completed') {
           clearInterval(poll);
           log('Analysis completed', 'success');

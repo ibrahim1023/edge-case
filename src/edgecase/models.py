@@ -119,4 +119,5 @@ class Session(BaseModel):
     implementation_result: ImplementationResult | None = None
     analysis_status: Literal["pending", "running", "completed", "failed"] = "pending"
     analysis_error: str | None = None
+    status_detail: str = ""
     expires_at: datetime | None = None

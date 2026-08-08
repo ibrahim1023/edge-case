@@ -1,6 +1,8 @@
 import os
 import tempfile
 
+os.environ["USE_MOCKS"] = "true"
+
 import pytest
 
 from edgecase.state import store

@@ -14,6 +14,7 @@ def status(id: UUID) -> dict:
         raise HTTPException(status_code=404, detail="Session not found")
     return {
         "status": session.analysis_status,
+        "detail": session.status_detail,
         "error": session.analysis_error,
         "findings_count": len(session.validated_scenarios),
         "repository": session.repository,
